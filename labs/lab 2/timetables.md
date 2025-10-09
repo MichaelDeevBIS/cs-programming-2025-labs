@@ -10,4 +10,4 @@ https://github.com/MichaelDeevBIS/cs-programming-2025-labs/blob/main/labs/lab%20
 3 неделя:
 https://github.com/MichaelDeevBIS/cs-programming-2025-labs/blob/main/labs/lab%202/timetable_3w.md
 
-![meme](images.jpeg)
+![meme](images.jpg)
