@@ -64,7 +64,7 @@ def easy_number():
         if not my_list:
             print('Error!')
         else:
-            print(f'Простые числа в диапозоне от {start} от {end}: {my_list}')
+            print(f'Простые числа в диапозоне от {start} до {end}: {my_list}')
 easy_number()
 
 
