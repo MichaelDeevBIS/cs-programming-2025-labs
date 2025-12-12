@@ -5,32 +5,30 @@ next_time = input('Введите еденицу измерения, в кото
 def calc(num, time, next_time):
     if time == 'h' and next_time == 's':
         r = num * 3600
-    if time == 'h' and next_time == 'm':
+    elif time == 'h' and next_time == 'm':
         r = num * 60
-    if time == 'm' and next_time == 'h':
+    elif time == 'm' and next_time == 'h':
         r = round(num / 60, 4)
-    if time == 'm' and next_time == 's':
+    elif time == 'm' and next_time == 's':
         r = num * 60
-    if time == 's' and next_time == 'h':
+    elif time == 's' and next_time == 'h':
         r = round(num / 3600, 4)
-    if time == 's' and next_time == 'm':
+    elif time == 's' and next_time == 'm':
         r = round(num / 60, 4)
     print(f'Ваш результат: {r}{next_time}')
 calc(num, time, next_time)
 
 
 #2задание
-def calculate_profit():
-    a = int(input('Введите сумму вклада: '))
-    years = int(input('Введите количество лет: '))
+a = int(input('Введите сумму вклада: '))
+years = int(input('Введите количество лет: '))
+def calculate_profit(a, years):
     if a < 30000:
         print('Минимальный вклад 30000 рублей!')
         return
-    k = a // 10000
+    k = (a // 10000) * 0.3
     if k > 5:
         k = 5
-    else:
-        k = k
     vklad = a
     for year in range(1, years + 1):
         if year <= 3:
@@ -43,15 +41,16 @@ def calculate_profit():
         vklad = vklad * (1 + r)
     prib = round(vklad - a, 2)
     print(f'Сумма прибыли равна: {prib}')
-calculate_profit()
+calculate_profit(a, years)
 
 
 #3задание
-def easy_number():
-    start = int(input('От какого числа: '))
-    end = int(input('До какого числа: '))
+start = int(input('От какого числа: '))
+end = int(input('До какого числа: '))
+def easy_number(start, end):
     if start > end:
         print('Error!')
+        return
     else:
         my_list = []
         for i in range(start, end + 1):
@@ -63,35 +62,38 @@ def easy_number():
                     my_list.append(i)
         if not my_list:
             print('Error!')
+            return
         else:
             print(f'Простые числа в диапозоне от {start} до {end}: {my_list}')
-easy_number()
+easy_number(start, end)
 
 
 #4задание
-def matrica():
-    n = int(input())
+n = int(input())
+def matrica(n):
     if n >2:
         mat1 = [list(map(int, input().split())) for x in range(n)]
         mat2 = [list(map(int, input().split())) for y in range(n)]
         if any(len(res) != n for res in mat1 + mat2):
             print('Error!')
+            return
         else:
             for i in range(n):
                 res = [mat1[i][j] + mat2[i][j] for j in range(n)]
                 print(' '.join(map(str, res)))
     else:
         print('Error!')
-matrica()
+        return
+matrica(n)
 
 
 #5задание
-def palindrom():
-    n = input('Введите строку: ')
+n = input('Введите строку: ')
+def palindrom(n):
     r = n.replace(' ', '')
     r1 = r.lower()
     if r1 == r1[::-1]:
         print('Да')
     else:
         print('Нет')
-palindrom()
+palindrom(n)
