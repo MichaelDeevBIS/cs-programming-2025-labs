@@ -66,20 +66,19 @@ reports = [
     {"author": "Senior Researcher Hall", "text": "All test results verified and approved."},
     {"author": "Operations Lead Grant", "text": "Emergency protocol draft shared via https://ops-share.scp"}
 ]
-new_reports = list(map(
-    lambda r: {
-        "author": r["author"],
-        "text": " ".join([
-            "[ДАННЫЕ УДАЛЕНЫ]" if w.startswith("http://") or w.startswith("https://") else w
-            for w in r["text"].split()
-        ])
-    },
-    filter(lambda r: "http://" in r["text"] or "https://" in r["text"], reports)
-)) + list(filter(
-    lambda r: not ("http://" in r["text"] or "https://" in r["text"]),
-    reports
-))
-print(new_reports)
+reports_with_links = []
+for report in reports:
+    if "http://" in report["text"] or "https://" in report["text"]:
+        reports_with_links.append(report)
+res = []
+for report in reports_with_links:
+    text = report["text"]
+    if "http://" in text:
+        text = text.replace("http://", "[ДАННЫЕ УДАЛЕНЫ]")
+    if "https://" in text:
+        text = text.replace("https://", "[ДАННЫЕ УДАЛЕНЫ]")
+    res.append({"author": report["author"], "text": text})
+print(res)
 
 
 #6задание
