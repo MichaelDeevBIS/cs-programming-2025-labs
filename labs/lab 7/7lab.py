@@ -15,7 +15,6 @@ staff_shifts = [
     {"name": "Agent Torres", "shift_cost": 90, "shifts": 22},
     {"name": "Researcher Hall", "shift_cost": 150, "shifts": 10}
 ]
-
 total_costs = list(map(lambda x: x["shift_cost"] * x["shifts"], staff_shifts))
 max_cost = max(total_costs)
 print("Общая стоимость работы каждого сотрудника:", total_costs)
@@ -28,14 +27,14 @@ personnel = [
     {"name": "Agent Brooks", "clearance": 4},
     {"name": "Technician Reed", "clearance": 1}
 ]
-
-categorized_personnel = list(map(lambda p: {
-    **p,
+result = list(map(lambda p: {
+    "name": p["name"],
+    "clearance": p["clearance"],
     "category": "Restricted" if p["clearance"] == 1 else
-                "Confidential" if 2 <= p["clearance"] <= 3 else
+                "Confidential" if p["clearance"] <= 3 else
                 "Top Secret"
 }, personnel))
-print(categorized_personnel)
+print(result)
 
 
 #4задание
