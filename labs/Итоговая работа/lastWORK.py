@@ -1,11 +1,10 @@
 import random
 
-# Конфигурация игры
 RACES = {
-    1: ("Человек", (90, 110), (10, 14), (6, 9), (12, 16)),
-    2: ("Эльф", (75, 95), (11, 15), (4, 7), (16, 20)),
-    3: ("Дворф", (100, 120), (12, 16), (8, 11), (8, 12)),
-    4: ("Орк", (95, 115), (14, 18), (5, 8), (6, 10))
+    1: ("Человек", (90, 110), (10, 14), (6, 9), (12, 16), (165, 185), (65, 85)),
+    2: ("Эльф", (75, 95), (11, 15), (4, 7), (16, 20), (175, 195), (55, 75)),
+    3: ("Дворф", (100, 120), (12, 16), (8, 11), (8, 12), (140, 160), (70, 90)),
+    4: ("Орк", (95, 115), (14, 18), (5, 8), (6, 10), (170, 190), (75, 95))
 }
 
 ENEMIES = [
@@ -24,32 +23,22 @@ ITEMS = [
     "Заточка для оружия", "Ремкомплект", "Антидот",
     "Стальной меч", "Кожаный доспех", "Кольцо защиты",
     "Амулет ловкости", "Эльфийский лук", "Доспех гномов",
-    "Посох мага", "Щит воина", "Сапоги скорости",
-    "Зелье маны", "Зелье невидимости", "Свиток телепортации",
-    "Бомба", "Ключ от сокровищницы"
+    "Посох мага", "Щит воина", "Сапоги скорости"
 ]
 
 ROOMS = {
     "combat": "Боевая комната",
     "rest": "Комната отдыха",
-    "treasure": "Комната с сундуком",
-    "trap": "Комната с ловушкой"
+    "treasure": "Комната с сундуком"
 }
 
-TRAPS = {
-    "spikes": ("Шипы наносят {damage} урона!", (10, 25)),
-    "poison": ("Вы отравлены!", None),
-    "pit": ("Падение в яму наносит {damage} урона!", (15, 30)),
-    "arrow": ("Стрела наносит {damage} урона!", (5, 20))
-}
-
-# Класс персонажа
 class Character:
     def __init__(self):
         self.race = self.level = 1
         self.exp = self.skill_points = 0
         self.exp_to_next = 100
         self.hp = self.max_hp = self.attack = self.defense = self.agility = 0
+        self.height = self.weight = 0
         self.inventory = []
         self.equipped = {"weapon": None, "armor": None, "ring": None, "amulet": None}
         self.coins = 0
@@ -66,6 +55,8 @@ class Character:
             f"Атака: {self.attack}",
             f"Защита: {self.defense}",
             f"Ловкость: {self.agility}",
+            f"Рост: {self.height} см",
+            f"Вес: {self.weight} кг",
             f"Монеты: {self.coins}",
             f"Инвентарь: {len(self.inventory)}/{self.inventory_size}"
         ]
@@ -76,6 +67,21 @@ class Character:
                 stats.append(f"{slot_name}: {item}")
         
         print("\n".join(stats))
+        
+    def calculate_height_weight_bonus(self):
+        """Рассчитывает влияние роста и веса на характеристики"""
+        
+        bmi = self.weight / ((self.height/100) ** 2)
+        if bmi < 18.5:
+            self.agility += 2
+        elif bmi > 25:
+            self.agility -= 1
+        
+        height_ratio = (self.height - 170) / 20
+        self.attack += int(height_ratio)
+        
+        weight_ratio = (self.weight - 70) / 15
+        self.defense += int(weight_ratio)
         
     def heal(self, amount):
         self.hp = min(self.max_hp, self.hp + amount)
@@ -100,10 +106,11 @@ class Character:
     def use_skill_points(self):
         while self.skill_points > 0:
             print(f"\nОчков прокачки: {self.skill_points}")
-            options = ["+15 к HP", "+3 к атаке", "+3 к защите", "+3 к ловкости", "Выйти"]
-            
-            for i, option in enumerate(options, 1):
-                print(f"{i}. {option} {'(стоит 1 очко)' if i < 5 else ''}")
+            print("1. +15 к HP (стоит 1 очко)")
+            print("2. +3 к атаке (стоит 1 очко)")
+            print("3. +3 к защите (стоит 1 очко)")
+            print("4. +3 к ловкости (стоит 1 очко)")
+            print("5. Выйти")
             
             try:
                 choice = int(input("Выберите улучшение: "))
@@ -129,7 +136,6 @@ class Character:
             except ValueError:
                 print("Введите число от 1 до 5")
 
-# Класс врага
 class Enemy:
     def __init__(self, floor):
         self.name, self.ability, self.attack_mod, self.defense_mod, self.agility_mod = random.choice(ENEMIES)
@@ -149,26 +155,30 @@ class Enemy:
         print(f"HP: {self.hp}/{self.max_hp}")
         print(f"Атака: {self.attack}, Защита: {self.defense}, Ловкость: {self.agility}")
 
-# Основные функции игры
 def create_character():
     character = Character()
     
     print("=== СОЗДАНИЕ ПЕРСОНАЖА ===")
     print("Выберите расу:")
-    for key, (name, _, _, _, _) in RACES.items():
-        print(f"{key}. {name}")
+    print("1. Человек")
+    print("2. Эльф")
+    print("3. Дворф")
+    print("4. Орк")
     
     while True:
         try:
             choice = int(input("Ваш выбор: "))
             if choice in RACES:
-                name, hp_range, atk_range, def_range, agi_range = RACES[choice]
+                name, hp_range, atk_range, def_range, agi_range, height_range, weight_range = RACES[choice]
                 character.race = name
                 character.max_hp = random.randint(*hp_range)
                 character.hp = character.max_hp
                 character.attack = random.randint(*atk_range)
                 character.defense = random.randint(*def_range)
                 character.agility = random.randint(*agi_range)
+                character.height = random.randint(*height_range)
+                character.weight = random.randint(*weight_range)
+                character.calculate_height_weight_bonus()
                 break
         except ValueError:
             print("Введите число от 1 до 4")
@@ -178,7 +188,8 @@ def create_character():
     return character
 
 def generate_room():
-    return random.choice(list(ROOMS.values()))
+    room_type = random.choice(list(ROOMS.keys()))
+    return {"type": room_type, "name": ROOMS[room_type]}
 
 def show_inventory_during_combat(player):
     usable_items = [item for item in player.inventory 
@@ -215,7 +226,7 @@ def show_inventory_during_combat(player):
                 for effect, action in effects.items():
                     if effect in item.lower():
                         action()
-                        print(f"{effect.capitalive()} увеличена на 5 на этот бой!")
+                        print(f"{effect.capitalize()} увеличена на 5 на этот бой!")
                         break
             
             player.inventory.remove(item)
@@ -228,7 +239,8 @@ def show_inventory_during_combat(player):
 def combat_room(player):
     print("\n=== БОЕВАЯ КОМНАТА ===")
     enemy = Enemy(player.level)
-    print(f"На вас напал {enemy.name}! Особенность: {enemy.ability}")
+    print(f"На вас напал {enemy.name}!")
+    print(f"Особенность: {enemy.ability}")
     
     player_turn = extra_attack = True
     
@@ -246,7 +258,10 @@ def combat_room(player):
                 break
         
         if player_turn:
-            print("\nВаш ход: 1. Атаковать 2. Использовать предмет 3. Увернуться")
+            print("\nВаш ход:")
+            print("1. Атаковать")
+            print("2. Использовать предмет")
+            print("3. Увернуться и контратаковать")
             
             try:
                 choice = int(input("Выберите действие: "))
@@ -266,13 +281,18 @@ def combat_room(player):
                         player_turn = False
                     
                 elif choice == 3:
-                    if random.random() < player.agility/150 + 0.1:
+                    dodge_chance = player.agility/150 + 0.1
+                    if random.random() < dodge_chance:
+                        print("Вы успешно уклонились и контратаковали!")
                         counter_damage = max(1, player.attack + random.randint(0, 2))
                         enemy.hp -= counter_damage
-                        print(f"Вы уклонились и контратаковали! Нанесено {counter_damage} урона!")
+                        print(f"Контратака наносит {counter_damage} урона!")
                         extra_attack = True
                     else:
                         print("Уклонение не удалось!")
+                        enemy_damage = max(1, int((enemy.attack - player.defense) * 1.5))
+                        player.hp -= enemy_damage
+                        print(f"Враг наносит усиленный удар {enemy_damage} урона!")
                     player_turn = False
                     
             except ValueError:
@@ -280,8 +300,7 @@ def combat_room(player):
         else:
             print(f"\nХод {enemy.name}:")
             enemy.turns += 1
-            
-            # Специальные способности
+           
             if enemy.name == "Гоблин" and random.random() < 0.3:
                 print(f"{enemy.name} атакует дважды!")
                 for i in range(2):
@@ -302,7 +321,7 @@ def combat_room(player):
             player_turn = True
             
             if extra_attack:
-                print("Вы получаете дополнительную атаку!")
+                print("Вы получаете дополнительную атаку за успешное уклонение!")
                 extra_attack = False
                 player_turn = True
     
@@ -356,20 +375,6 @@ def rest_room(player):
     if player.skill_points > 0 and input("Использовать очки прокачки? (да/нет): ").lower() == "да":
         player.use_skill_points()
 
-def trap_room(player):
-    print("\n=== КОМНАТА С ЛОВУШКОЙ ===")
-    trap_type, (message, damage_range) = random.choice(list(TRAPS.items()))
-    
-    if trap_type == "poison":
-        player.poisoned = 3
-        print(message)
-    else:
-        damage = random.randint(*damage_range)
-        player.hp -= damage
-        print(message.format(damage=damage))
-    
-    print(f"Ваше HP: {player.hp}/{player.max_hp}")
-
 def manage_inventory(player, forced=False):
     while True:
         print(f"\n=== ИНВЕНТАРЬ ({len(player.inventory)}/{player.inventory_size}) ===")
@@ -381,10 +386,18 @@ def manage_inventory(player, forced=False):
         else:
             print("Инвентарь пуст")
         
-        print("\n1. Использовать 2. Выбросить 3. Экипировать 4. Снять", "5. Выйти" if not forced else "")
+        print("\n1. Использовать")
+        print("2. Выбросить")
+        print("3. Экипировать")
+        print("4. Снять")
+        if not forced:
+            print("5. Выйти")
         
         try:
-            choice = int(input("Выбор: "))
+            if forced:
+                choice = int(input("Выберите действие (1-4): "))
+            else:
+                choice = int(input("Выберите действие: "))
             
             if choice == 1 and player.inventory:
                 idx = int(input("Номер предмета: ")) - 1
@@ -449,7 +462,8 @@ def manage_inventory(player, forced=False):
             print("Введите число")
 
 def main_game():
-    print("=== ТЕКСТОВАЯ RPG ===\n")
+    print("=== ТЕКСТОВАЯ RPG ===")
+    print("Добро пожаловать в подземелье!\n")
     
     player = create_character()
     current_floor = rooms_cleared = 0
@@ -460,54 +474,72 @@ def main_game():
         print(f"\n=== ЭТАЖ {current_floor + 1} ===")
         print(f"Комнат пройдено: {rooms_cleared}")
         
-        left_room = right_room = generate_room()
-        left_visible = right_visible = random.choice([True, False])
+        left_room = generate_room()
+        right_room = generate_room()
         
-        print(f"\nПеред вами развилка:\n1. Слева: {left_room if left_visible else '???'}")
-        print(f"2. Справа: {right_room if right_visible else '???'}")
-        print("3. Инвентарь 4. Характеристики 5. Выйти")
+        left_visible = random.choice([True, False])
+        right_visible = random.choice([True, False])
+        
+        print("\nПеред вами развилка:")
+        print(f"1. Слева: {left_room['name'] if left_visible else '???'}")
+        print(f"2. Справа: {right_room['name'] if right_visible else '???'}")
+        print("3. Открыть инвентарь")
+        print("4. Показать характеристики")
+        print("5. Выйти из игры")
         
         try:
             choice = int(input("Куда пойти? "))
             
-            if choice == 1 or choice == 2:
-                room_type = random.choice(list(ROOMS.keys()))
-                
-                if room_type == "combat":
-                    if not combat_room(player):
-                        break
-                elif room_type == "treasure":
-                    treasure_room(player)
-                elif room_type == "rest":
-                    rest_room(player)
-                elif room_type == "trap":
-                    trap_room(player)
-                
-                rooms_cleared += 1
-                
-                if rooms_cleared % 5 == 0:
-                    current_floor += 1
-                    player.heal(player.max_hp)
-                    print(f"\n=== ЭТАЖ {current_floor + 1}! ===\nВраги стали сильнее!")
-                    
+            if choice == 1:
+                selected_room = left_room
+                print(f"\nВы идете налево...")
+            elif choice == 2:
+                selected_room = right_room
+                print(f"\nВы идете направо...")
             elif choice == 3:
                 manage_inventory(player)
+                continue
             elif choice == 4:
                 player.show_stats()
+                continue
             elif choice == 5:
                 print("Спасибо за игру!")
                 break
+            else:
+                print("Неверный выбор")
+                continue
+         
+            if selected_room["type"] == "combat":
+                if not combat_room(player):
+                    break
+            elif selected_room["type"] == "treasure":
+                treasure_room(player)
+            elif selected_room["type"] == "rest":
+                rest_room(player)
+            
+            rooms_cleared += 1
+            
+            if rooms_cleared % 5 == 0:
+                current_floor += 1
+                player.heal(player.max_hp)
+                print(f"\n=== ВЫ СПУСТИЛИСЬ НА ЭТАЖ {current_floor + 1}! ===")
+                print("Враги стали сильнее!")
+                print(f"Вы полностью восстановили здоровье!")
                 
         except ValueError:
             print("Введите число от 1 до 5")
     
     print(f"\n=== ИГРА ОКОНЧЕНА ===")
-    print(f"Уровень: {player.level} | Комнат: {rooms_cleared} | Этаж: {current_floor + 1} | Монеты: {player.coins}")
+    print(f"Ваш результат:")
+    print(f"Уровень: {player.level}")
+    print(f"Пройдено комнат: {rooms_cleared}")
+    print(f"Достигнутый этаж: {current_floor + 1}")
+    print(f"Всего монет: {player.coins}")
 
 if __name__ == "__main__":
     try:
         main_game()
     except KeyboardInterrupt:
-        print("\nИгра прервана")
+        print("\n\nИгра прервана")
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"Произошла ошибка: {e}")
